@@ -59,12 +59,16 @@ export default function ScannerPage() {
 
   const categories = useMemo(() => {
     const set = new Set<string>();
-    results.forEach(r => set.add(r.category));
+    const safeResults = Array.isArray(results) ? results : [];
+    safeResults.forEach(r => {
+      if (r && r.category) set.add(r.category);
+    });
     return ['All', ...Array.from(set)];
   }, [results]);
 
   const filteredAndSortedResults = useMemo(() => {
-    let list = [...results];
+    const safeResults = Array.isArray(results) ? results : [];
+    let list = [...safeResults];
 
     if (selectedCategory !== 'All') {
       list = list.filter(item => item.category === selectedCategory);
