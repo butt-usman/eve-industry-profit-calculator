@@ -1,0 +1,4 @@
+- Tech Stack: Next.js (App Router, TypeScript, Tailwind CSS) running inside Docker.
+- Data Rules: Never read large EVE Static Data Export (SDE) JSON/SQLite files directly into context (anything over 500KB). Always write a small Node/Python script to inspect schemas or filter data.
+- Git Workflow: Initialize Git if not already initialized. Make clean, atomic commits with clear messages whenever a milestone is completed. Never commit `.env` files, `node_modules`, or cached market dumps.
+- EVE Math Rules: Always round material quantities up per job run (`Math.ceil(baseQty * (1 - meBonus) * (1 - structureBonus))`, minimum 1 per run), and account for System Cost Index, SCC surcharge (4%), facility tax, broker fees, and sales tax.
