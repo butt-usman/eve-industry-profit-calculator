@@ -107,10 +107,6 @@ async function fetchAverageDailyVolume(regionId: number, typeId: number): Promis
   return defaultVol;
 }
 
-  }
-  return {};
-}
-
 function computePrices(hubId: string, typeIds: number[], ordersMap: Record<number, any[]>, globalAverages: Record<number, number>) {
   const hub = TRADE_HUBS[hubId] || TRADE_HUBS['dodixie'];
   const stationId = hub.stationId;
