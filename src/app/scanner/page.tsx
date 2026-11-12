@@ -97,6 +97,8 @@ export default function ScannerPage() {
     } else {
       setSortField(field);
       setSortAsc(false);
+    }
+  };
   return (
     <div className="min-h-screen bg-eve-dark text-slate-100">
       <Header
