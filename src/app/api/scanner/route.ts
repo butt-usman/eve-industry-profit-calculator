@@ -47,6 +47,9 @@ async function getGlobalAverages(): Promise<Record<number, number>> {
     }
   } catch (err) {
     console.error('Failed global ESI prices:', err);
+  }
+  return {};
+}
 async function fetchRegionOrders(regionId: number, typeIds: number[]) {
   const now = Date.now();
   if (!regionCaches[regionId]) regionCaches[regionId] = { orders: {}, timestamp: 0 };
