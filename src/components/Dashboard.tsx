@@ -1,7 +1,11 @@
 import React from 'react';
 import { ArrowUpRight, ArrowDownRight, Clock, DollarSign, TrendingUp } from 'lucide-react';
+import { TRADE_HUBS } from '@/data/hubs';
 
-export const Dashboard = ({ calculation, formatIsk, sccSurcharge, facilityTax, brokerFee, salesTax, pricingMode, currentBp }: any) => {
+export const Dashboard = ({ calculation, formatIsk, sccSurcharge, facilityTax, brokerFee, salesTax, pricingMode, currentBp, buyHub, sellHub }: any) => {
+  const buyHubName = TRADE_HUBS[buyHub]?.name || 'Dodixie';
+  const sellHubName = TRADE_HUBS[sellHub]?.name || 'Dodixie';
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -43,7 +47,7 @@ export const Dashboard = ({ calculation, formatIsk, sccSurcharge, facilityTax, b
 
       <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-5 shadow-xl backdrop-blur space-y-4">
         <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-          <TrendingUp className="w-4 h-4 text-amber-400" /> Financial & Revenue Summary
+          <TrendingUp className="w-4 h-4 text-amber-400" /> Financial & Revenue Summary ({buyHubName} ➔ {sellHubName})
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
@@ -51,7 +55,7 @@ export const Dashboard = ({ calculation, formatIsk, sccSurcharge, facilityTax, b
             <div className="font-semibold text-slate-200 border-b border-slate-800 pb-1 flex justify-between">
               <span>Costs Breakdown</span><span>ISK</span>
             </div>
-            <div className="flex justify-between text-slate-400"><span>Material ({pricingMode}):</span><span className="text-slate-200">{formatIsk(calculation.totalMaterialCost)}</span></div>
+            <div className="flex justify-between text-slate-400"><span>Material ({buyHubName} - {pricingMode}):</span><span className="text-slate-200">{formatIsk(calculation.totalMaterialCost)}</span></div>
             <div className="flex justify-between text-slate-400"><span>Job Cost:</span><span className="text-slate-200">{formatIsk(calculation.jobCost)}</span></div>
             <div className="flex justify-between text-slate-400"><span>SCC ({sccSurcharge}%):</span><span className="text-slate-200">{formatIsk(calculation.sccFee)}</span></div>
             <div className="flex justify-between text-slate-400"><span>Tax ({facilityTax}%):</span><span className="text-slate-200">{formatIsk(calculation.taxFee)}</span></div>
@@ -64,7 +68,7 @@ export const Dashboard = ({ calculation, formatIsk, sccSurcharge, facilityTax, b
             <div className="font-semibold text-slate-200 border-b border-slate-800 pb-1 flex justify-between">
               <span>Revenue Breakdown</span><span>ISK</span>
             </div>
-            <div className="flex justify-between text-slate-400"><span>Output ({calculation.totalUnits}x {currentBp.outputName}):</span><span className="text-slate-200">{formatIsk(calculation.grossRevenue)}</span></div>
+            <div className="flex justify-between text-slate-400"><span>Output ({calculation.totalUnits}x {currentBp.outputName} @ {sellHubName}):</span><span className="text-slate-200">{formatIsk(calculation.grossRevenue)}</span></div>
             <div className="flex justify-between text-slate-400"><span>Broker ({brokerFee}%):</span><span className="text-slate-200">-{formatIsk(calculation.brokerFeeAmount)}</span></div>
             <div className="flex justify-between text-slate-400"><span>Sales Tax ({salesTax}%):</span><span className="text-slate-200">-{formatIsk(calculation.salesTaxAmount)}</span></div>
             <div className="flex justify-between text-slate-200 font-semibold pt-1 border-t border-slate-800">
@@ -76,3 +80,4 @@ export const Dashboard = ({ calculation, formatIsk, sccSurcharge, facilityTax, b
     </div>
   );
 };
+

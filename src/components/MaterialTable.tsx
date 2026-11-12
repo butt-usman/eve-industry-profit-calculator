@@ -1,14 +1,17 @@
 import React from 'react';
 import { Shield } from 'lucide-react';
+import { TRADE_HUBS } from '@/data/hubs';
 
-export const MaterialTable = ({ calculation, runs, pricingMode, formatIsk }: any) => {
+export const MaterialTable = ({ calculation, runs, pricingMode, formatIsk, buyHub }: any) => {
+  const buyHubName = TRADE_HUBS[buyHub]?.name || 'Dodixie';
+
   return (
     <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-5 shadow-xl backdrop-blur space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
           <Shield className="w-4 h-4 text-amber-400" /> Material Requirements ({runs} runs)
         </h2>
-        <span className="text-xs text-slate-400">Unit Prices via Jita {pricingMode === 'buy' ? 'Buy' : 'Sell'}</span>
+        <span className="text-xs text-slate-400">Unit Prices via {buyHubName} {pricingMode === 'buy' ? 'Buy' : 'Sell'}</span>
       </div>
 
       <div className="overflow-x-auto">
@@ -41,3 +44,4 @@ export const MaterialTable = ({ calculation, runs, pricingMode, formatIsk }: any
     </div>
   );
 };
+

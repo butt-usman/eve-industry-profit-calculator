@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { SAMPLE_BLUEPRINTS } from '@/data/blueprints';
+import { TRADE_HUBS, DEFAULT_HUB_ID } from '@/data/hubs';
 import { Calculator, TrendingUp, DollarSign, Clock, RefreshCw, Layers, Settings } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { BlueprintSelector } from '@/components/BlueprintSelector';
@@ -25,7 +26,11 @@ export default function Home() {
   const [runs, setRuns] = useState<number>(10);
   const [pricingMode, setPricingMode] = useState<'buy' | 'sell'>('buy');
 
-  const [prices, setPrices] = useState<Record<number, { buy: number; sell: number }>>({});
+  const [buyHub, setBuyHub] = useState<string>(DEFAULT_HUB_ID);
+  const [sellHub, setSellHub] = useState<string>(DEFAULT_HUB_ID);
+
+  const [buyHubPrices, setBuyHubPrices] = useState<Record<number, { buy: number; sell: number }>>({});
+  const [sellHubPrices, setSellHubPrices] = useState<Record<number, { buy: number; sell: number }>>({});
   const [loadingPrices, setLoadingPrices] = useState<boolean>(true);
   const [priceTimestamp, setPriceTimestamp] = useState<number | null>(null);
 
@@ -33,10 +38,12 @@ export default function Home() {
     setLoadingPrices(true);
     try {
       const typeIds = currentBp.materials.map(m => m.typeId).concat([currentBp.outputTypeId]);
-      const res = await fetch(`/api/market?type_ids=${typeIds.join(',')}`);
+      const res = await fetch(`/api/market?buyHub=${buyHub}&sellHub=${sellHub}&type_ids=${typeIds.join(',')}`);
       const data = await res.json();
-      if (data && data.prices) {
-        setPrices(data.prices);
+      if (data) {
+        if (data.buyHubPrices) setBuyHubPrices(data.buyHubPrices);
+        if (data.sellHubPrices) setSellHubPrices(data.sellHubPrices);
+        if (data.prices && !data.buyHubPrices) setBuyHubPrices(data.prices);
         setPriceTimestamp(data.timestamp || Date.now());
       }
     } catch (err) {
@@ -48,7 +55,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchMarketPrices();
-  }, [selectedBpId]);
+  }, [selectedBpId, buyHub, sellHub]);
 
   const calculation = useMemo(() => {
     let totalMaterialCost = 0;
@@ -57,14 +64,14 @@ export default function Home() {
       const rawPerRun = mat.quantity * (1 - meBonusRate) * (1 - structureMeBonus);
       const perRunQty = Math.max(1, Math.ceil(rawPerRun));
       const totalQty = perRunQty * runs;
-      const unitPrice = prices[mat.typeId]?.[pricingMode] || 100;
+      const unitPrice = buyHubPrices[mat.typeId]?.[pricingMode] || 100;
       const totalCost = totalQty * unitPrice;
       totalMaterialCost += totalCost;
       return { ...mat, perRunQty, totalQty, unitPrice, totalCost };
     });
 
     const estimatedBaseMaterialValue = currentBp.materials.reduce((acc, mat) => {
-      const sellPrice = prices[mat.typeId]?.sell || 100;
+      const sellPrice = buyHubPrices[mat.typeId]?.sell || 100;
       return acc + (mat.quantity * runs * sellPrice);
     }, 0);
 
@@ -74,11 +81,11 @@ export default function Home() {
     const totalManufacturingFees = jobCost + sccFee + taxFee;
     const totalProductionCost = totalMaterialCost + totalManufacturingFees;
 
-    const outputUnitPrice = prices[currentBp.outputTypeId]?.buy || prices[currentBp.outputTypeId]?.sell || 1000;
+    const outputUnitPrice = sellHubPrices[currentBp.outputTypeId]?.sell || sellHubPrices[currentBp.outputTypeId]?.buy || 1000;
     const totalUnits = currentBp.outputQuantity * runs;
     const grossRevenue = totalUnits * outputUnitPrice;
     const brokerFeeAmount = grossRevenue * (brokerFee / 100);
-    const salesTaxAmount = grossRevenue * (salesTax / 100);
+    const salesTaxAmount = (grossRevenue - brokerFeeAmount) * (salesTax / 100);
     const netRevenue = grossRevenue - brokerFeeAmount - salesTaxAmount;
     const netProfit = netRevenue - totalProductionCost;
     const profitMargin = netRevenue > 0 ? (netProfit / netRevenue) * 100 : 0;
@@ -94,7 +101,7 @@ export default function Home() {
       brokerFeeAmount, salesTaxAmount, netRevenue, netProfit, profitMargin,
       totalUnits, outputUnitPrice, totalBuildTimeHours, iskPerHour
     };
-  }, [currentBp, meLevel, teLevel, structureMeBonus, structureTeBonus, systemCostIndex, facilityTax, brokerFee, salesTax, sccSurcharge, runs, pricingMode, prices]);
+  }, [currentBp, meLevel, teLevel, structureMeBonus, structureTeBonus, systemCostIndex, facilityTax, brokerFee, salesTax, sccSurcharge, runs, pricingMode, buyHubPrices, sellHubPrices]);
 
   const formatIsk = (val: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(val);
 
@@ -103,6 +110,10 @@ export default function Home() {
       <Header
         pricingMode={pricingMode}
         setPricingMode={setPricingMode}
+        buyHub={buyHub}
+        setBuyHub={setBuyHub}
+        sellHub={sellHub}
+        setSellHub={setSellHub}
         fetchMarketPrices={fetchMarketPrices}
         loadingPrices={loadingPrices}
       />
@@ -147,6 +158,8 @@ export default function Home() {
               salesTax={salesTax}
               pricingMode={pricingMode}
               currentBp={currentBp}
+              buyHub={buyHub}
+              sellHub={sellHub}
             />
 
             <MaterialTable
@@ -154,6 +167,7 @@ export default function Home() {
               runs={runs}
               pricingMode={pricingMode}
               formatIsk={formatIsk}
+              buyHub={buyHub}
             />
 
             {priceTimestamp && (
