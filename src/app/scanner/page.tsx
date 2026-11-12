@@ -42,12 +42,15 @@ export default function ScannerPage() {
     try {
       const res = await fetch(`/api/scanner?hub=${hub}`);
       const data = await res.json();
-      if (data && data.results) {
+      if (data && Array.isArray(data.results)) {
         setResults(data.results);
-        setTimestamp(data.timestamp || Date.now());
+      } else {
+        setResults([]);
       }
+      setTimestamp(data?.timestamp || Date.now());
     } catch (err) {
       console.error('Failed to fetch scanner data:', err);
+      setResults([]);
     } finally {
       setLoading(false);
     }
@@ -195,7 +198,7 @@ export default function ScannerPage() {
                 ) : filteredAndSortedResults.length === 0 ? (
                   <tr><td colSpan={9} className="py-12 text-center text-slate-500">No blueprints match the current filters.</td></tr>
                 ) : (
-                  filteredAndSortedResults.map((item) => (
+                  (Array.isArray(filteredAndSortedResults) ? filteredAndSortedResults : []).map((item) => (
                     <tr key={item.id} className="hover:bg-slate-800/40 transition group">
                       <td className="py-3.5 px-4 font-medium text-white">
                         <div className="flex items-center gap-2">
