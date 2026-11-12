@@ -61,7 +61,7 @@ export default function ScannerPage() {
   }, [hub]);
 
   const categories = useMemo(() => {
-    const set = new Set<string>();
+    const set = new Set<string>(['T1 Cruiser', 'T1 Battlecruiser', 'T1 Frigate', 'T2 Module', 'Rig', 'Drone']);
     const safeResults = Array.isArray(results) ? results : [];
     safeResults.forEach(r => {
       if (r && r.category) set.add(r.category);
@@ -169,7 +169,7 @@ export default function ScannerPage() {
                 className="bg-transparent text-white font-medium focus:outline-none cursor-pointer"
               >
                 {categories.map(cat => (
-                  <option key={cat} value={cat} className="bg-slate-900">{cat}</option>
+                  <option key={cat} value={cat} className="bg-slate-900 text-white">{cat}</option>
                 ))}
               </select>
             </div>
