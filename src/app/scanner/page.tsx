@@ -106,6 +106,8 @@ export default function ScannerPage() {
       setSortAsc(false);
     }
   };
+  const formatIsk = (val: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(val || 0);
+
   return (
     <div className="min-h-screen bg-eve-dark text-slate-100">
       <Header
