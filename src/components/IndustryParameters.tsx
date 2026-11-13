@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings } from 'lucide-react';
+import { Settings, Building2 } from 'lucide-react';
 
 interface IndustryParametersProps {
   meLevel: number;
@@ -29,12 +29,43 @@ export const IndustryParameters: React.FC<IndustryParametersProps> = ({
   facilityTax, setFacilityTax, brokerFee, setBrokerFee,
   salesTax, setSalesTax
 }) => {
+  const applyPreset = (type: 'npc' | 'raitaru' | 'azbel') => {
+    if (type === 'npc') {
+      setStructureMeBonus(0.0);
+      setStructureTeBonus(0.0);
+      setFacilityTax(0.0);
+      setSystemCostIndex(4.5);
+    } else if (type === 'raitaru') {
+      setStructureMeBonus(0.01);
+      setStructureTeBonus(0.15);
+      setFacilityTax(1.0);
+      setSystemCostIndex(3.5);
+    } else if (type === 'azbel') {
+      setStructureMeBonus(0.01);
+      setStructureTeBonus(0.20);
+      setFacilityTax(0.5);
+      setSystemCostIndex(3.0);
+    }
+  };
+
   return (
     <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-5 shadow-xl backdrop-blur space-y-4">
       <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
         <Settings className="w-4 h-4 text-amber-400" />
         Industry Parameters
       </h2>
+
+      <div className="space-y-1.5">
+        <label className="text-xs text-slate-400 flex items-center gap-1.5">
+          <Building2 className="w-3.5 h-3.5 text-amber-400" />
+          Facility & Station Presets
+        </label>
+        <div className="grid grid-cols-3 gap-1.5">
+          <button onClick={() => applyPreset('npc')} className="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/50 text-slate-300 text-xs py-1.5 px-2 rounded-lg transition text-center" title="NPC Station (0% Bonus)">NPC Station</button>
+          <button onClick={() => applyPreset('raitaru')} className="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/50 text-slate-300 text-xs py-1.5 px-2 rounded-lg transition text-center" title="Raitaru (1% ME, 15% TE)">Raitaru</button>
+          <button onClick={() => applyPreset('azbel')} className="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/50 text-slate-300 text-xs py-1.5 px-2 rounded-lg transition text-center" title="Azbel/Sotiyo (1% ME, 20% TE)">Azbel / Sotiyo</button>
+        </div>
+      </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
