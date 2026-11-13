@@ -11,23 +11,84 @@ import { Dashboard } from '@/components/Dashboard';
 import { MaterialTable } from '@/components/MaterialTable';
 
 export default function Home() {
-  const [selectedBpId, setSelectedBpId] = useState<string>(SAMPLE_BLUEPRINTS[0].id);
+  const [selectedBpId, setSelectedBpId] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const bpParam = params.get('bp');
+      if (bpParam && SAMPLE_BLUEPRINTS.some(b => b.id === bpParam)) return bpParam;
+      const stored = localStorage.getItem('eve_selected_bp');
+      if (stored && SAMPLE_BLUEPRINTS.some(b => b.id === stored)) return stored;
+    }
+    return SAMPLE_BLUEPRINTS[0].id;
+  });
   const currentBp = SAMPLE_BLUEPRINTS.find(b => b.id === selectedBpId) || SAMPLE_BLUEPRINTS[0];
 
-  const [meLevel, setMeLevel] = useState<number>(10);
-  const [teLevel, setTeLevel] = useState<number>(20);
-  const [structureMeBonus, setStructureMeBonus] = useState<number>(0.01);
-  const [structureTeBonus, setStructureTeBonus] = useState<number>(0.20);
-  const [systemCostIndex, setSystemCostIndex] = useState<number>(4.5);
-  const [facilityTax, setFacilityTax] = useState<number>(1.0);
-  const [brokerFee, setBrokerFee] = useState<number>(3.0);
-  const [salesTax, setSalesTax] = useState<number>(3.6);
+  const [meLevel, setMeLevel] = useState<number>(() => {
+    const s = typeof window !== 'undefined' ? localStorage.getItem('eve_me') : null;
+    return s !== null ? parseFloat(s) : 10;
+  });
+  const [teLevel, setTeLevel] = useState<number>(() => {
+    const s = typeof window !== 'undefined' ? localStorage.getItem('eve_te') : null;
+    return s !== null ? parseFloat(s) : 20;
+  });
+  const [structureMeBonus, setStructureMeBonus] = useState<number>(() => {
+    const s = typeof window !== 'undefined' ? localStorage.getItem('eve_str_me') : null;
+    return s !== null ? parseFloat(s) : 0.01;
+  });
+  const [structureTeBonus, setStructureTeBonus] = useState<number>(() => {
+    const s = typeof window !== 'undefined' ? localStorage.getItem('eve_str_te') : null;
+    return s !== null ? parseFloat(s) : 0.20;
+  });
+  const [systemCostIndex, setSystemCostIndex] = useState<number>(() => {
+    const s = typeof window !== 'undefined' ? localStorage.getItem('eve_sci') : null;
+    return s !== null ? parseFloat(s) : 4.5;
+  });
+  const [facilityTax, setFacilityTax] = useState<number>(() => {
+    const s = typeof window !== 'undefined' ? localStorage.getItem('eve_fac_tax') : null;
+    return s !== null ? parseFloat(s) : 1.0;
+  });
+  const [brokerFee, setBrokerFee] = useState<number>(() => {
+    const s = typeof window !== 'undefined' ? localStorage.getItem('eve_broker') : null;
+    return s !== null ? parseFloat(s) : 3.0;
+  });
+  const [salesTax, setSalesTax] = useState<number>(() => {
+    const s = typeof window !== 'undefined' ? localStorage.getItem('eve_sales_tax') : null;
+    return s !== null ? parseFloat(s) : 3.6;
+  });
   const [sccSurcharge] = useState<number>(4.0);
-  const [runs, setRuns] = useState<number>(10);
-  const [pricingMode, setPricingMode] = useState<'buy' | 'sell'>('buy');
+  const [runs, setRuns] = useState<number>(() => {
+    const s = typeof window !== 'undefined' ? localStorage.getItem('eve_runs') : null;
+    return s !== null ? parseInt(s, 10) : 10;
+  });
+  const [pricingMode, setPricingMode] = useState<'buy' | 'sell'>(() => {
+    const s = typeof window !== 'undefined' ? localStorage.getItem('eve_pricing_mode') : null;
+    return (s === 'buy' || s === 'sell') ? s : 'buy';
+  });
 
-  const [buyHub, setBuyHub] = useState<string>(DEFAULT_HUB_ID);
-  const [sellHub, setSellHub] = useState<string>(DEFAULT_HUB_ID);
+  const [buyHub, setBuyHub] = useState<string>(() => {
+    const s = typeof window !== 'undefined' ? localStorage.getItem('eve_buy_hub') : null;
+    return s || DEFAULT_HUB_ID;
+  });
+  const [sellHub, setSellHub] = useState<string>(() => {
+    const s = typeof window !== 'undefined' ? localStorage.getItem('eve_sell_hub') : null;
+    return s || DEFAULT_HUB_ID;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('eve_selected_bp', selectedBpId);
+    localStorage.setItem('eve_me', meLevel.toString());
+    localStorage.setItem('eve_te', teLevel.toString());
+    localStorage.setItem('eve_str_me', structureMeBonus.toString());
+    localStorage.setItem('eve_str_te', structureTeBonus.toString());
+    localStorage.setItem('eve_sci', systemCostIndex.toString());
+    localStorage.setItem('eve_fac_tax', facilityTax.toString());
+    localStorage.setItem('eve_broker', brokerFee.toString());
+    localStorage.setItem('eve_sales_tax', salesTax.toString());
+    localStorage.setItem('eve_runs', runs.toString());
+    localStorage.setItem('eve_pricing_mode', pricingMode);
+    localStorage.setItem('eve_buy_hub', buyHub);
+    localStorage.setItem('eve_sell_hub', sellHub);
+  }, [selectedBpId, meLevel, teLevel, structureMeBonus, structureTeBonus, systemCostIndex, facilityTax, brokerFee, salesTax, runs, pricingMode, buyHub, sellHub]);
 
   const [buyHubPrices, setBuyHubPrices] = useState<Record<number, { buy: number; sell: number }>>({});
   const [sellHubPrices, setSellHubPrices] = useState<Record<number, { buy: number; sell: number }>>({});

@@ -202,7 +202,15 @@ export default function ScannerPage() {
                   <tr><td colSpan={9} className="py-12 text-center text-slate-500">No blueprints match the current filters.</td></tr>
                 ) : (
                   (Array.isArray(filteredAndSortedResults) ? filteredAndSortedResults : []).map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-800/40 transition group">
+                    <tr 
+                      key={item.id} 
+                      onClick={() => {
+                        localStorage.setItem('eve_selected_bp', item.id);
+                        window.location.href = `/?bp=${item.id}`;
+                      }}
+                      className="hover:bg-slate-800/40 transition group cursor-pointer"
+                      title="Click to select this item in the calculator"
+                    >
                       <td className="py-3.5 px-4 font-medium text-white">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-amber-400 font-bold text-xs shrink-0">
