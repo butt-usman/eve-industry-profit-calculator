@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { SAMPLE_BLUEPRINTS } from '@/data/blueprints';
-import { TRADE_HUBS } from '@/data/hubs';
+import { TRADE_HUBS, DEFAULT_HUB_ID } from '@/data/hubs';
+import { loadPersistentCache, savePersistentCache } from '@/lib/cache';
 
 interface CacheEntry {
   orders: Record<number, any[]>;
@@ -137,27 +138,48 @@ export async function GET(request: Request) {
   const hubParam = url.searchParams.get('hub') || 'dodixie';
   const hub = TRADE_HUBS[hubParam] ? hubParam : 'dodixie';
 
-  try {
-    const globalAverages = await getGlobalAverages();
-    const prices = computePrices(hub, [], {}, globalAverages);
+  const meLevel = parseFloat(url.searchParams.get('me') || '10');
+  const teLevel = parseFloat(url.searchParams.get('te') || '20');
+  const structureMeBonus = parseFloat(url.searchParams.get('structureMe') || '0.01');
+  const structureTeBonus = parseFloat(url.searchParams.get('structureTe') || '0.20');
+  const systemCostIndex = parseFloat(url.searchParams.get('sci') || '3.5');
+  const sccSurcharge = parseFloat(url.searchParams.get('scc') || '4.0');
+  const facilityTax = parseFloat(url.searchParams.get('tax') || '5.0');
+  const brokerFee = parseFloat(url.searchParams.get('broker') || '3.0');
+  const salesTax = parseFloat(url.searchParams.get('salesTax') || '3.6');
 
-    const meLevel = 10;
-    const teLevel = 20;
-    const structureMeBonus = 0.01;
-    const structureTeBonus = 0.20;
-    const systemCostIndex = 4.5;
-    const facilityTax = 1.0;
-    const brokerFee = 3.0;
-    const salesTax = 3.6;
-    const sccSurcharge = 4.0;
+  try {
+    const persistentStore = loadPersistentCache(hub);
+    const now = Date.now();
+    const CACHE_TTL = 30 * 60 * 1000;
+
+    const typeIdsSet = new Set<number>();
+    SAMPLE_BLUEPRINTS.forEach(bp => {
+      typeIdsSet.add(bp.outputTypeId);
+      bp.materials.forEach(mat => typeIdsSet.add(mat.typeId));
+    });
+    const allTypeIds = Array.from(typeIdsSet);
+
+    const isStale = (now - persistentStore.timestamp) > CACHE_TTL;
+    if (isStale || Object.keys(persistentStore.prices).length === 0) {
+      const globalAverages = await getGlobalAverages();
+      const prices = computePrices(hub, allTypeIds, {}, globalAverages);
+      for (const [idStr, p] of Object.entries(prices)) {
+        const id = parseInt(idStr, 10);
+        persistentStore.prices[id] = p;
+      }
+      persistentStore.timestamp = now;
+      savePersistentCache(hub, persistentStore);
+    }
+
+    const prices = persistentStore.prices;
 
     const scannerResults = SAMPLE_BLUEPRINTS.map(bp => {
       let totalMaterialCost = 0;
       bp.materials.forEach(mat => {
-        const meBonusRate = meLevel * 0.01;
-        const rawPerRun = mat.quantity * (1 - meBonusRate) * (1 - structureMeBonus);
+        const rawPerRun = mat.quantity * (1 - (meLevel * 0.01)) * (1 - structureMeBonus);
         const perRunQty = Math.max(1, Math.ceil(rawPerRun));
-        const defaultMatPrice = DEFAULT_PRICES[mat.typeId]?.buy || (mat.typeId === 34 ? 6 : mat.typeId === 35 ? 20 : mat.typeId === 36 ? 90 : 250);
+        const defaultMatPrice = DEFAULT_PRICES[mat.typeId]?.buy || 100;
         const unitPrice = prices[mat.typeId]?.buy || defaultMatPrice;
         totalMaterialCost += perRunQty * unitPrice;
       });
@@ -168,8 +190,7 @@ export async function GET(request: Request) {
       const totalManufacturingFees = jobCost + sccFee + taxFee;
       const totalProductionCost = totalMaterialCost + totalManufacturingFees;
 
-      const defaultOutPrice = DEFAULT_PRICES[bp.outputTypeId]?.sell || (bp.category.includes('Ship') || bp.category.includes('Cruiser') || bp.category.includes('Battlecruiser') ? 15000000 : 2000000);
-      const outputUnitPrice = prices[bp.outputTypeId]?.sell || defaultOutPrice;
+      const outputUnitPrice = prices[bp.outputTypeId]?.sell || DEFAULT_PRICES[bp.outputTypeId]?.sell || 1000000;
       const totalUnits = bp.outputQuantity;
       const grossRevenue = totalUnits * outputUnitPrice;
       const brokerFeeAmount = grossRevenue * (brokerFee / 100);
@@ -182,7 +203,6 @@ export async function GET(request: Request) {
       const buildTimeHours = Math.max(0.001, singleRunTimeSeconds / 3600);
       const iskPerSlotHour = buildTimeHours > 0 ? netProfit / buildTimeHours : 0;
 
-      // Realistic default trade volumes based on category
       const avgDailyVolume = bp.category === 'Ammo' ? 5000 : bp.category === 'Drone' ? 150 : bp.category === 'T2 Module' ? 80 : 35;
       const estDailyIskPotential = avgDailyVolume * netProfit;
 
@@ -206,12 +226,11 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       hub,
-      timestamp: Date.now(),
+      timestamp: persistentStore.timestamp,
+      cached: true,
       results: scannerResults
     });
   } catch (error) {
-    console.error('Scanner API error:', error);
-    // Return instant fallback results
     const fallbackResults = SAMPLE_BLUEPRINTS.map(bp => {
       const buildCost = 1000000;
       const netSellRevenue = 1500000;
