@@ -95,9 +95,10 @@ function computePrices(hubId: string, typeIds: number[], ordersMap: Record<numbe
     const globalAvg = globalAverages[id];
     const defaultEntry = DEFAULT_PRICES[id];
 
-    let buyPrice = lowestSell > 0 ? lowestSell : (globalAvg ? globalAvg * 0.92 : (defaultEntry ? defaultEntry.buy : 100));
-    // Market sell price for manufactured items should be the lowest sell order (market ask price), not highest buy order
-    let sellPrice = lowestSell > 0 ? lowestSell : (globalAvg ? globalAvg * 1.05 : (defaultEntry ? defaultEntry.sell : 110));
+    // 'buy' price = cost to buy materials instantly from market sell orders
+    let buyPrice = lowestSell > 0 ? lowestSell : (globalAvg ? globalAvg * 1.05 : (defaultEntry ? defaultEntry.sell : 110));
+    // 'sell' price = price for buy orders / regional bid orders
+    let sellPrice = highestBuy > 0 ? highestBuy : (globalAvg ? globalAvg * 0.92 : (defaultEntry ? defaultEntry.buy : 100));
 
     result[id] = { buy: buyPrice, sell: sellPrice };
   }
