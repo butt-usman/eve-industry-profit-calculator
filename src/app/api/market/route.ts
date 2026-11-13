@@ -88,14 +88,16 @@ function computePrices(hubId: string, typeIds: number[], ordersMap: Record<numbe
     const sellOrders = targetOrders.filter((o: any) => !o.is_buy_order);
     const buyOrders = targetOrders.filter((o: any) => o.is_buy_order);
 
-    let buyPrice = sellOrders.length > 0 ? Math.min(...sellOrders.map((o: any) => o.price)) : 0;
-    let sellPrice = buyOrders.length > 0 ? Math.max(...buyOrders.map((o: any) => o.price)) : 0;
+    const lowestSell = sellOrders.length > 0 ? Math.min(...sellOrders.map((o: any) => o.price)) : 0;
+    const highestBuy = buyOrders.length > 0 ? Math.max(...buyOrders.map((o: any) => o.price)) : 0;
 
     const globalAvg = globalAverages[id];
     const defaultEntry = DEFAULT_PRICES[id];
 
-    if (buyPrice <= 0) buyPrice = globalAvg ? globalAvg * 0.92 : (defaultEntry ? defaultEntry.buy : 100);
-    if (sellPrice <= 0) sellPrice = globalAvg ? globalAvg * 1.05 : (defaultEntry ? defaultEntry.sell : 110);
+    let buyPrice = lowestSell > 0 ? lowestSell : (globalAvg ? globalAvg * 0.92 : (defaultEntry ? defaultEntry.buy : 100));
+    // Market sell price for manufactured items should be the lowest sell order (market ask price), not highest buy order
+    let sellPrice = lowestSell > 0 ? lowestSell : (globalAvg ? globalAvg * 1.05 : (defaultEntry ? defaultEntry.sell : 110));
+
     result[id] = { buy: buyPrice, sell: sellPrice };
   }
   return result;
