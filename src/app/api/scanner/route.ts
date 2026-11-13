@@ -26,6 +26,7 @@ const DEFAULT_PRICES: Record<number, { buy: number; sell: number }> = {
   3330: { buy: 45000000.00, sell: 52000000.00 },
   32800: { buy: 1800000.00, sell: 2200000.00 },
   622: { buy: 12000000.00, sell: 14500000.00 },
+  4395: { buy: 15000000.00, sell: 18000000.00 },
 };
 
 async function getGlobalAverages(): Promise<Record<number, number>> {
@@ -51,14 +52,15 @@ async function getGlobalAverages(): Promise<Record<number, number>> {
   }
   return {};
 }
-async function fetchRegionOrders(regionId: number, typeIds: number[]) {
+async function fetchRegionOrders(regionId: number, typeIds: number[], force = false) {
   const now = Date.now();
   if (!regionCaches[regionId]) regionCaches[regionId] = { orders: {}, timestamp: 0 };
   const cache = regionCaches[regionId];
   const missing = typeIds.filter(id => !cache.orders[id]);
-  if ((now - cache.timestamp < CACHE_TTL) && missing.length === 0) return cache.orders;
+  const ttlExpired = now - cache.timestamp >= CACHE_TTL;
+  if (!ttlExpired && !force && missing.length === 0) return cache.orders;
 
-  const fetchIds = (now - cache.timestamp >= CACHE_TTL) ? typeIds : missing;
+  const fetchIds = (ttlExpired || force) ? typeIds : missing;
   await Promise.all(
     fetchIds.map(async (typeId) => {
       try {
@@ -152,6 +154,7 @@ export async function GET(request: Request) {
     const persistentStore = loadPersistentCache(hub);
     const now = Date.now();
     const CACHE_TTL = 30 * 60 * 1000;
+    const refresh = url.searchParams.get('refresh') === 'true';
 
     const typeIdsSet = new Set<number>();
     SAMPLE_BLUEPRINTS.forEach(bp => {
@@ -161,9 +164,18 @@ export async function GET(request: Request) {
     const allTypeIds = Array.from(typeIdsSet);
 
     const isStale = (now - persistentStore.timestamp) > CACHE_TTL;
-    if (isStale || Object.keys(persistentStore.prices).length === 0) {
-      const globalAverages = await getGlobalAverages();
-      const prices = computePrices(hub, allTypeIds, {}, globalAverages);
+    const needsRefresh = refresh || isStale || Object.keys(persistentStore.prices).length === 0;
+
+    if (needsRefresh) {
+      const hubConfig = TRADE_HUBS[hub] || TRADE_HUBS[DEFAULT_HUB_ID];
+      const regionId = hubConfig.regionId;
+
+      const [regionalOrders, globalAverages] = await Promise.all([
+        fetchRegionOrders(regionId, allTypeIds, needsRefresh),
+        getGlobalAverages(),
+      ]);
+      const prices = computePrices(hub, allTypeIds, regionalOrders, globalAverages);
+
       for (const [idStr, p] of Object.entries(prices)) {
         const id = parseInt(idStr, 10);
         persistentStore.prices[id] = p;

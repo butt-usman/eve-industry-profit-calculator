@@ -22,6 +22,7 @@ const DEFAULT_PRICES: Record<number, { buy: number; sell: number }> = {
   3330: { buy: 45000000.00, sell: 52000000.00 },
   32800: { buy: 1800000.00, sell: 2200000.00 },
   622: { buy: 12000000.00, sell: 14500000.00 },
+  4395: { buy: 15000000.00, sell: 18000000.00 },
 };
 
 async function getGlobalAverages(): Promise<Record<number, number>> {

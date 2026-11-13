@@ -37,10 +37,11 @@ export default function ScannerPage() {
   const [sortAsc, setSortAsc] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const fetchScannerData = async () => {
+  const fetchScannerData = async (force = false) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/scanner?hub=${hub}`);
+      const refreshParam = force ? '&refresh=true' : '';
+      const res = await fetch(`/api/scanner?hub=${hub}${refreshParam}`);
       const data = await res.json();
       if (data && Array.isArray(data.results)) {
         setResults(data.results);
@@ -117,7 +118,7 @@ export default function ScannerPage() {
         setBuyHub={setHub}
         sellHub={hub}
         setSellHub={setHub}
-        fetchMarketPrices={fetchScannerData}
+        fetchMarketPrices={() => fetchScannerData(true)}
         loadingPrices={loading}
       />
 
