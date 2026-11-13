@@ -131,13 +131,8 @@ export default function Home() {
       return { ...mat, perRunQty, totalQty, unitPrice, totalCost };
     });
 
-    const estimatedBaseMaterialValue = currentBp.materials.reduce((acc, mat) => {
-      const sellPrice = buyHubPrices[mat.typeId]?.sell || 100;
-      return acc + (mat.quantity * runs * sellPrice);
-    }, 0);
-
-    const jobCost = estimatedBaseMaterialValue * (systemCostIndex / 100);
-    const sccFee = jobCost * (sccSurcharge / 100);
+    const jobCost = totalMaterialCost * (systemCostIndex / 100);
+    const sccFee = totalMaterialCost * (sccSurcharge / 100);
     const taxFee = jobCost * (facilityTax / 100);
     const totalManufacturingFees = jobCost + sccFee + taxFee;
     const totalProductionCost = totalMaterialCost + totalManufacturingFees;
