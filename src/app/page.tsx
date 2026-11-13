@@ -160,6 +160,9 @@ export default function Home() {
               currentBp={currentBp}
               buyHub={buyHub}
               sellHub={sellHub}
+              priceTimestamp={priceTimestamp}
+              fetchMarketPrices={fetchMarketPrices}
+              loadingPrices={loadingPrices}
             />
 
             <MaterialTable
