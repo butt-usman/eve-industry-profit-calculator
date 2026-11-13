@@ -58,7 +58,7 @@ export default function Home() {
   const [sccSurcharge] = useState<number>(4.0);
   const [runs, setRuns] = useState<number>(() => {
     const s = typeof window !== 'undefined' ? localStorage.getItem('eve_runs') : null;
-    return s !== null ? parseInt(s, 10) : 10;
+    return s !== null ? parseInt(s, 10) : 1;
   });
   const [pricingMode, setPricingMode] = useState<'buy' | 'sell'>(() => {
     const s = typeof window !== 'undefined' ? localStorage.getItem('eve_pricing_mode') : null;
