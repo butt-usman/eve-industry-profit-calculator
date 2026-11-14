@@ -7,6 +7,8 @@ import { TRADE_HUBS } from '@/data/hubs';
 interface HeaderProps {
   pricingMode?: 'buy' | 'sell';
   setPricingMode?: (mode: 'buy' | 'sell') => void;
+  revenueBasis?: 'sellOrder' | 'buyOrder';
+  setRevenueBasis?: (mode: 'sellOrder' | 'buyOrder') => void;
   buyHub?: string;
   setBuyHub?: (hubId: string) => void;
   sellHub?: string;
@@ -18,6 +20,8 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   pricingMode = 'buy',
   setPricingMode = () => {},
+  revenueBasis = 'sellOrder',
+  setRevenueBasis = () => {},
   buyHub = 'dodixie',
   setBuyHub = () => {},
   sellHub = 'dodixie',
@@ -113,6 +117,24 @@ export const Header: React.FC<HeaderProps> = ({
                 title="Acquire materials via buy orders"
               >
                 {buyHubName} Sell
+              </button>
+            </div>
+
+            <div className="flex items-center bg-slate-900 border border-slate-700/60 rounded-lg p-1 text-xs self-end" title="Revenue basis for the finished product">
+              <span className="px-2 text-slate-500 uppercase text-[10px] tracking-wider">Sell At</span>
+              <button
+                onClick={() => setRevenueBasis('sellOrder')}
+                className={`px-3 py-1.5 rounded-md font-medium transition-colors ${revenueBasis === 'sellOrder' ? 'bg-emerald-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white'}`}
+                title="Sell product at the lowest sell order price (you list it)"
+              >
+                Sell Order
+              </button>
+              <button
+                onClick={() => setRevenueBasis('buyOrder')}
+                className={`px-3 py-1.5 rounded-md font-medium transition-colors ${revenueBasis === 'buyOrder' ? 'bg-emerald-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white'}`}
+                title="Instant-sell product to the highest buy order"
+              >
+                Buy Order
               </button>
             </div>
           </>

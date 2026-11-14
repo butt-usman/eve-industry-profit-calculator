@@ -23,6 +23,8 @@ export default function Home() {
   const [sccSurcharge] = useState<number>(4.0);
   const [runs, setRuns] = useState<number>(1);
   const [pricingMode, setPricingMode] = useState<'buy' | 'sell'>('buy');
+  // Revenue basis: 'sellOrder' = list product at lowest sell order, 'buyOrder' = instant-sell at highest buy order
+  const [revenueBasis, setRevenueBasis] = useState<'sellOrder' | 'buyOrder'>('sellOrder');
   const [buyHub, setBuyHub] = useState<string>(DEFAULT_HUB_ID);
   const [sellHub, setSellHub] = useState<string>(DEFAULT_HUB_ID);
   const [mounted, setMounted] = useState<boolean>(false);
@@ -69,6 +71,9 @@ export default function Home() {
     const sPm = localStorage.getItem('eve_pricing_mode');
     if (sPm === 'buy' || sPm === 'sell') setPricingMode(sPm);
 
+    const sRb = localStorage.getItem('eve_revenue_basis');
+    if (sRb === 'sellOrder' || sRb === 'buyOrder') setRevenueBasis(sRb);
+
     const sBuyHub = localStorage.getItem('eve_buy_hub');
     if (sBuyHub && TRADE_HUBS[sBuyHub]) setBuyHub(sBuyHub);
 
@@ -91,9 +96,10 @@ export default function Home() {
     localStorage.setItem('eve_sales_tax', salesTax.toString());
     localStorage.setItem('eve_runs', runs.toString());
     localStorage.setItem('eve_pricing_mode', pricingMode);
+    localStorage.setItem('eve_revenue_basis', revenueBasis);
     localStorage.setItem('eve_buy_hub', buyHub);
     localStorage.setItem('eve_sell_hub', sellHub);
-  }, [mounted, selectedBpId, meLevel, teLevel, structureMeBonus, structureTeBonus, systemCostIndex, facilityTax, brokerFee, salesTax, runs, pricingMode, buyHub, sellHub]);
+  }, [mounted, selectedBpId, meLevel, teLevel, structureMeBonus, structureTeBonus, systemCostIndex, facilityTax, brokerFee, salesTax, runs, pricingMode, revenueBasis, buyHub, sellHub]);
 
   const [buyHubPrices, setBuyHubPrices] = useState<Record<number, { buy: number; sell: number }>>({});
   const [sellHubPrices, setSellHubPrices] = useState<Record<number, { buy: number; sell: number }>>({});
@@ -146,7 +152,11 @@ export default function Home() {
     const totalManufacturingFees = jobCost + sccFee + taxFee;
     const totalProductionCost = totalMaterialCost + totalManufacturingFees;
 
-    const outputUnitPrice = sellHubPrices[currentBp.outputTypeId]?.sell || sellHubPrices[currentBp.outputTypeId]?.buy || 1000;
+    const outPriceInfo = sellHubPrices[currentBp.outputTypeId];
+    // API fields are inverted: .buy = lowest sell order, .sell = highest buy order
+    const outputUnitPrice = revenueBasis === 'sellOrder'
+      ? (outPriceInfo?.buy || outPriceInfo?.sell || 1000)
+      : (outPriceInfo?.sell || outPriceInfo?.buy || 1000);
     const totalUnits = currentBp.outputQuantity * runs;
     const grossRevenue = totalUnits * outputUnitPrice;
     const brokerFeeAmount = grossRevenue * (brokerFee / 100);
@@ -166,7 +176,7 @@ export default function Home() {
       brokerFeeAmount, salesTaxAmount, netRevenue, netProfit, profitMargin,
       totalUnits, outputUnitPrice, totalBuildTimeHours, iskPerHour
     };
-  }, [currentBp, meLevel, teLevel, structureMeBonus, structureTeBonus, systemCostIndex, facilityTax, brokerFee, salesTax, sccSurcharge, runs, pricingMode, buyHubPrices, sellHubPrices]);
+  }, [currentBp, meLevel, teLevel, structureMeBonus, structureTeBonus, systemCostIndex, facilityTax, brokerFee, salesTax, sccSurcharge, runs, pricingMode, revenueBasis, buyHubPrices, sellHubPrices]);
 
   const formatIsk = (val: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(val);
 
@@ -175,6 +185,8 @@ export default function Home() {
       <Header
         pricingMode={pricingMode}
         setPricingMode={setPricingMode}
+        revenueBasis={revenueBasis}
+        setRevenueBasis={setRevenueBasis}
         buyHub={buyHub}
         setBuyHub={setBuyHub}
         sellHub={sellHub}
@@ -222,6 +234,7 @@ export default function Home() {
               brokerFee={brokerFee}
               salesTax={salesTax}
               pricingMode={pricingMode}
+              revenueBasis={revenueBasis}
               currentBp={currentBp}
               buyHub={buyHub}
               sellHub={sellHub}

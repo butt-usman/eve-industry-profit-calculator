@@ -206,7 +206,7 @@ export async function GET(request: Request) {
       const totalManufacturingFees = jobCost + sccFee + taxFee;
       const totalProductionCost = totalMaterialCost + totalManufacturingFees;
 
-      const outputUnitPrice = prices[bp.outputTypeId]?.sell || DEFAULT_PRICES[bp.outputTypeId]?.sell || 1000000;
+      const outputUnitPrice = prices[bp.outputTypeId]?.buy || prices[bp.outputTypeId]?.sell || DEFAULT_PRICES[bp.outputTypeId]?.buy || DEFAULT_PRICES[bp.outputTypeId]?.sell || 1000000;
       const totalUnits = bp.outputQuantity;
       const grossRevenue = totalUnits * outputUnitPrice;
       const brokerFeeAmount = grossRevenue * (brokerFee / 100);

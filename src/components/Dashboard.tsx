@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowUpRight, ArrowDownRight, Clock, DollarSign, TrendingUp, RefreshCw, Tag } from 'lucide-react';
 import { TRADE_HUBS } from '@/data/hubs';
 
-export const Dashboard = ({ calculation, formatIsk, sccSurcharge, facilityTax, brokerFee, salesTax, pricingMode, currentBp, buyHub, sellHub, priceTimestamp, fetchMarketPrices, loadingPrices }: any) => {
+export const Dashboard = ({ calculation, formatIsk, sccSurcharge, facilityTax, brokerFee, salesTax, pricingMode, revenueBasis, currentBp, buyHub, sellHub, priceTimestamp, fetchMarketPrices, loadingPrices }: any) => {
   const buyHubName = TRADE_HUBS[buyHub]?.name || 'Dodixie';
   const sellHubName = TRADE_HUBS[sellHub]?.name || 'Dodixie';
 
@@ -95,7 +95,7 @@ export const Dashboard = ({ calculation, formatIsk, sccSurcharge, facilityTax, b
               <span>Revenue Breakdown</span><span>ISK</span>
             </div>
             <div className="flex justify-between text-slate-400 items-center">
-              <span className="flex items-center gap-1"><Tag className="w-3 h-3 text-amber-400" /> Market Sell Price (
+              <span className="flex items-center gap-1"><Tag className="w-3 h-3 text-amber-400" /> {revenueBasis === 'buyOrder' ? 'Buy Order Price (instant sell) (' : 'Sell Order Price ('}
                   <a
                     href={`https://evetycoon.com/market/${currentBp.outputTypeId}`}
                     target="_blank"
