@@ -218,15 +218,16 @@ export default function ScannerPage() {
                           </div>
                           <div>
                             <div className="font-semibold text-slate-100 group-hover:text-amber-400 transition">
-                  <a
-                    href={`https://evetycoon.com/type/${item.outputTypeId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline"
-                  >
-                    {item.outputName}
-                  </a>
-                </div>
+                              <a
+                                onClick={(e) => e.stopPropagation()}
+                                href={`https://evetycoon.com/market/${item.outputTypeId}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:underline"
+                              >
+                                {item.outputName}
+                              </a>
+                            </div>
                             <div className="text-[10px] text-slate-400">Type ID: {item.outputTypeId}</div>
                           </div>
                         </div>

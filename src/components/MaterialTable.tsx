@@ -30,7 +30,7 @@ export const MaterialTable = ({ calculation, runs, pricingMode, formatIsk, buyHu
               <tr key={mat.typeId} className="hover:bg-slate-800/30 transition">
                 <td className="py-2.5 px-3 font-medium text-white flex items-center gap-2">
                   <a
-                    href={`https://evetycoon.com/type/${mat.typeId}`}
+                    href={`https://evetycoon.com/market/${mat.typeId}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-amber-400 hover:underline"

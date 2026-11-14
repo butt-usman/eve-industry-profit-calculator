@@ -97,7 +97,7 @@ export const Dashboard = ({ calculation, formatIsk, sccSurcharge, facilityTax, b
             <div className="flex justify-between text-slate-400 items-center">
               <span className="flex items-center gap-1"><Tag className="w-3 h-3 text-amber-400" /> Market Sell Price (
                   <a
-                    href={`https://evetycoon.com/type/${currentBp.outputTypeId}`}
+                    href={`https://evetycoon.com/market/${currentBp.outputTypeId}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-amber-400 hover:underline"
