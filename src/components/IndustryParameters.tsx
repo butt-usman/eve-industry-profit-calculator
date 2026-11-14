@@ -29,6 +29,11 @@ export const IndustryParameters: React.FC<IndustryParametersProps> = ({
   facilityTax, setFacilityTax, brokerFee, setBrokerFee,
   salesTax, setSalesTax
 }) => {
+  // Determine which preset is currently active so we can show it as selected
+  const isNpcPreset = structureMeBonus === 0 && structureTeBonus === 0 && facilityTax === 0 && systemCostIndex === 4.5;
+  const isRaitaruPreset = structureMeBonus === 0.01 && structureTeBonus === 0.15 && facilityTax === 1 && systemCostIndex === 3.5;
+  const isAzbelPreset = structureMeBonus === 0.01 && structureTeBonus === 0.20 && facilityTax === 0.5 && systemCostIndex === 3.0;
+
   const applyPreset = (type: 'npc' | 'raitaru' | 'azbel') => {
     if (type === 'npc') {
       setStructureMeBonus(0.0);
@@ -61,9 +66,39 @@ export const IndustryParameters: React.FC<IndustryParametersProps> = ({
           Facility & Station Presets
         </label>
         <div className="grid grid-cols-3 gap-1.5">
-          <button onClick={() => applyPreset('npc')} className="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/50 text-slate-300 text-xs py-1.5 px-2 rounded-lg transition text-center" title="NPC Station (0% Bonus)">NPC Station</button>
-          <button onClick={() => applyPreset('raitaru')} className="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/50 text-slate-300 text-xs py-1.5 px-2 rounded-lg transition text-center" title="Raitaru (1% ME, 15% TE)">Raitaru</button>
-          <button onClick={() => applyPreset('azbel')} className="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/50 text-slate-300 text-xs py-1.5 px-2 rounded-lg transition text-center" title="Azbel/Sotiyo (1% ME, 20% TE)">Azbel / Sotiyo</button>
+          <button
+            onClick={() => applyPreset('npc')}
+            className={`border text-xs py-1.5 px-2 rounded-lg transition text-center ${
+              isNpcPreset
+                ? 'bg-amber-500/15 border-amber-500 text-amber-400 font-semibold'
+                : 'bg-slate-950 hover:bg-slate-800 border-slate-800 hover:border-amber-500/50 text-slate-300'
+            }`}
+            title="NPC Station (0% Bonus)"
+          >
+            NPC Station
+          </button>
+          <button
+            onClick={() => applyPreset('raitaru')}
+            className={`border text-xs py-1.5 px-2 rounded-lg transition text-center ${
+              isRaitaruPreset
+                ? 'bg-amber-500/15 border-amber-500 text-amber-400 font-semibold'
+                : 'bg-slate-950 hover:bg-slate-800 border-slate-800 hover:border-amber-500/50 text-slate-300'
+            }`}
+            title="Raitaru (1% ME, 15% TE)"
+          >
+            Raitaru
+          </button>
+          <button
+            onClick={() => applyPreset('azbel')}
+            className={`border text-xs py-1.5 px-2 rounded-lg transition text-center ${
+              isAzbelPreset
+                ? 'bg-amber-500/15 border-amber-500 text-amber-400 font-semibold'
+                : 'bg-slate-950 hover:bg-slate-800 border-slate-800 hover:border-amber-500/50 text-slate-300'
+            }`}
+            title="Azbel/Sotiyo (1% ME, 20% TE)"
+          >
+            Azbel / Sotiyo
+          </button>
         </div>
       </div>
 
