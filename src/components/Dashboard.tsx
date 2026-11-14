@@ -95,7 +95,16 @@ export const Dashboard = ({ calculation, formatIsk, sccSurcharge, facilityTax, b
               <span>Revenue Breakdown</span><span>ISK</span>
             </div>
             <div className="flex justify-between text-slate-400 items-center">
-              <span className="flex items-center gap-1"><Tag className="w-3 h-3 text-amber-400" /> Market Sell Price ({currentBp.outputName}):</span>
+              <span className="flex items-center gap-1"><Tag className="w-3 h-3 text-amber-400" /> Market Sell Price (
+                  <a
+                    href={`https://evetycoon.com/type/${currentBp.outputTypeId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-amber-400 hover:underline"
+                  >
+                    {currentBp.outputName}
+                  </a>
+                ):</span>
               <span className="text-amber-400 font-bold">{formatIsk(calculation.outputUnitPrice)} ISK / unit</span>
             </div>
             <div className="flex justify-between text-slate-400"><span>Output ({calculation.totalUnits}x @ {sellHubName}):</span><span className="text-slate-200">{formatIsk(calculation.grossRevenue)}</span></div>

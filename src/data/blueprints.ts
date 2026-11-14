@@ -93,7 +93,7 @@ export const SAMPLE_BLUEPRINTS: BlueprintItem[] = [
     outputQuantity: 1,
     baseBuildTimeSeconds: 5400,
     materials: [
-      { typeId: 34, name: 'Tritanium', quantity: 490000 },
+      { typeId: 34, name: 'Tritanium', quantity: 540000 },
       { typeId: 35, name: 'Pyerite', quantity: 148000 },
       { typeId: 36, name: 'Mexallon', quantity: 37000 },
       { typeId: 37, name: 'Isogen', quantity: 8800 },

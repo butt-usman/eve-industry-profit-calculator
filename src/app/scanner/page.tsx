@@ -217,7 +217,16 @@ export default function ScannerPage() {
                             {item.outputName.charAt(0)}
                           </div>
                           <div>
-                            <div className="font-semibold text-slate-100 group-hover:text-amber-400 transition">{item.outputName}</div>
+                            <div className="font-semibold text-slate-100 group-hover:text-amber-400 transition">
+                  <a
+                    href={`https://evetycoon.com/type/${item.outputTypeId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline"
+                  >
+                    {item.outputName}
+                  </a>
+                </div>
                             <div className="text-[10px] text-slate-400">Type ID: {item.outputTypeId}</div>
                           </div>
                         </div>

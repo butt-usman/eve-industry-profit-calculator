@@ -29,8 +29,15 @@ export const MaterialTable = ({ calculation, runs, pricingMode, formatIsk, buyHu
             {calculation.materialBreakdown.map((mat: any) => (
               <tr key={mat.typeId} className="hover:bg-slate-800/30 transition">
                 <td className="py-2.5 px-3 font-medium text-white flex items-center gap-2">
+                  <a
+                    href={`https://evetycoon.com/type/${mat.typeId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-amber-400 hover:underline"
+                  >
+                    {mat.name}
+                  </a>
                   <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                  {mat.name}
                 </td>
                 <td className="py-2.5 px-3 text-right text-slate-300">{mat.perRunQty.toLocaleString()}</td>
                 <td className="py-2.5 px-3 text-right font-semibold text-amber-400">{mat.totalQty.toLocaleString()}</td>
