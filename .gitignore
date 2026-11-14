@@ -6,6 +6,7 @@ data/sde/*
 *.sqlite
 *.db
 cache/
+.cache/
 .DS_Store
 dist/
 build/
