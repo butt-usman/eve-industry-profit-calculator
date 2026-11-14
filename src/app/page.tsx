@@ -125,11 +125,15 @@ export default function Home() {
 
   const calculation = useMemo(() => {
     let totalMaterialCost = 0;
+    const meBonusRate = meLevel * 0.01;
+    const combinedMeMult = (1 - meBonusRate) * (1 - structureMeBonus);
+
     const materialBreakdown = currentBp.materials.map(mat => {
-      const meBonusRate = meLevel * 0.01;
-      const rawPerRun = mat.quantity * (1 - meBonusRate) * (1 - structureMeBonus);
-      const perRunQty = Math.max(1, Math.ceil(rawPerRun));
-      const totalQty = perRunQty * runs;
+      // EVE Online official job material formula: ceil(baseQty * runs * (1 - ME) * (1 - StructME))
+      const rawJobQty = mat.quantity * runs * combinedMeMult;
+      // Round floating point inaccuracies (e.g. 0.99999999) before ceil
+      const totalQty = Math.max(runs, Math.ceil(Math.round(rawJobQty * 100000) / 100000));
+      const perRunQty = Math.ceil(totalQty / runs);
       const unitPrice = buyHubPrices[mat.typeId]?.[pricingMode] || 100;
       const totalCost = totalQty * unitPrice;
       totalMaterialCost += totalCost;

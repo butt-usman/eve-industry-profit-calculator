@@ -188,11 +188,13 @@ export async function GET(request: Request) {
 
     const prices = persistentStore.prices;
 
+    const combinedMeMult = (1 - (meLevel * 0.01)) * (1 - structureMeBonus);
+
     const scannerResults = SAMPLE_BLUEPRINTS.map(bp => {
       let totalMaterialCost = 0;
       bp.materials.forEach(mat => {
-        const rawPerRun = mat.quantity * (1 - (meLevel * 0.01)) * (1 - structureMeBonus);
-        const perRunQty = Math.max(1, Math.ceil(rawPerRun));
+        const rawJobQty = mat.quantity * combinedMeMult;
+        const perRunQty = Math.max(1, Math.ceil(Math.round(rawJobQty * 100000) / 100000));
         const defaultMatPrice = DEFAULT_PRICES[mat.typeId]?.buy || 100;
         const unitPrice = prices[mat.typeId]?.buy || defaultMatPrice;
         totalMaterialCost += perRunQty * unitPrice;
